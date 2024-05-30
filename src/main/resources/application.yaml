@@ -16,7 +16,7 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
 okta:
   oauth2:
-    issuer: https://dev-244j33jcrmunc3ca.us.auth0.com/
+    issuer: <<Auth0 Issuer>>
     client-id: <<Auth0 Client Id>>
     client-secret: <<Auth0 Client Secret>>
 open-weather-map:
