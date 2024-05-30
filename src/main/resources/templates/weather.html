@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns= "http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta http-equiv="Content-Language" content="en">
+<head>
+    <title>Weather SPA</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        .bold-text {
+            font-weight: bold;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #00008B;
+            padding: 20px 20px;
+        }
+        .header div {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .header p, .header a {
+            margin-right: 10px;
+            color: #FFFFFF;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+        .header a:hover {
+            color: #4CAF50;
+        }
+        #citySelect {
+            width: 200px;
+            height: 30px;
+            margin: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #00008B;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 20px;
+        }
+        button.active {
+            background-color: #008CBA;
+        }
+        #weatherTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px;
+        }
+        #weatherTable th, #weatherTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        #weatherTable tr:nth-child(even) {
+            background-color: #D3D3D3;
+        }
+        #weatherTable th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #00008B;
+            color: white;
+        }
+        .tab table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .tab table th, .tab table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .tab table th {
+            background-color: #00008B;
+            color: white;
+        }
+        .tab table tr:nth-child(even) {
+            background-color: #D3D3D3;
+        }
+        .tab table tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div sec:authorize="isAuthenticated()">
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/spa/weather}" class="bold-text">Weather App</a>
+        <a th:href="@{/spa/user}">User Preference</a>
+    </div>
+    <div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/logout}">Log Out</a>
+        </div>
+    </div>
+</div>
+<select id="citySelect">
+    <option th:each="city : ${cities}" th:value="${city}" th:text="${city}"></option>
+</select>
+<button onclick="getWeatherForecast()">Get Weather Forecast</button>
+<div id="tabs">
+</div>
+<div id="tabContents">
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var userId = /*[[${profile.get('email')}]]*/ 'defaultEmail';
+    var weatherData = {};
+
+    function getWeatherForecast() {
+        var city = $('#citySelect').val();
+        $.get('/api/weather/forecast', {city: city, userId: userId}, function(data) {
+            // Clear the tabs and tab contents
+            $('#tabs').empty();
+            $('#tabContents').empty();
+
+            // Store the weather data
+            weatherData = data;
+
+            // Generate tabs
+            data.daily.forEach(function(day, index) {
+                var tabId = 'tab' + index;
+                $('#tabs').append('<button id="button' + tabId + '" onclick="selectTab(\'' + tabId + '\')">' + day.dt + '</button>');
+
+                if (day.alertUser) {
+                    var alertMessage = "Warning: Temperature alert! Max temperature: " + data.maxTempAlert;
+                    $('#button' + tabId).after('<span style="color:red;" title="' + alertMessage + '">⚠️</span>');
+                }
+            });
+
+            // Create a single table for the headers and data
+            var table = '<table id="weatherTable"><thead><tr><th>Hour</th><th>Description</th><th>Temp (°C)</th><th>Min (°C)</th><th>Max (°C)</th></tr></thead><tbody id="tableBody"></tbody></table>';
+            $('#tabContents').append(table);
+
+            // Preselect the first day
+            if (data.daily.length > 0) {
+                selectTab('tab0');
+            }
+        });
+    }
+
+    function selectTab(tabId) {
+        // Remove 'active' class from all buttons
+        $('button').removeClass('active');
+
+        // Add 'active' class to the selected button
+        $('#button' + tabId).addClass('active');
+
+        // Get the index of the selected day
+        var index = parseInt(tabId.replace('tab', ''));
+
+        // Get the hourly data for the selected day
+        var hourlyData = weatherData.daily[index].hourly;
+
+        // Clear the table body
+        $('#tableBody').empty();
+
+        // Populate the table body with hourly data
+        hourlyData.forEach(function(hour, index) {
+            var color = index % 2 === 0 ? '#ADD8E6' : '#D3D3D3';
+            var row = '<tr style="background-color: ' + color + '"><td>' + hour.hour + '</td><td>' + hour.description + '</td><td>' + hour.temperature + '</td><td>' + hour.min_temperature + '</td><td>' + hour.max_temperature + '</td></tr>';
+            $('#tableBody').append(row);
+        });
+    }
+</script>
+</body>
+</html>

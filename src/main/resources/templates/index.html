@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <style>
+        .bold-text {
+            font-weight: bold;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #00008B;
+            padding: 20px 20px;
+        }
+        .header div {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .header p, .header a {
+            margin-right: 10px;
+            color: #FFFFFF;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+        .header a:hover {
+            color: #4CAF50;
+        }
+        #citySelect {
+            width: 200px;
+            height: 30px;
+            margin: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #00008B;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 20px;
+        }
+        button.active {
+            background-color: #008CBA;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div sec:authorize="isAuthenticated()">
+        <a th:href="@{/}" class="bold-text">Home</a>
+        <a th:href="@{/spa/weather}">Weather App</a>
+        <a th:href="@{/spa/user}">User Preference</a>
+    </div>
+    <div sec:authorize="!isAuthenticated()">
+        <p>Welcome to Weather App</p>
+    </div>
+    <div>
+        <div sec:authorize="!isAuthenticated()">
+            <a th:href="@{/oauth2/authorization/okta}">Log In</a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+            <a th:href="@{/logout}">Log Out</a>
+        </div>
+    </div>
+</div>
+<div sec:authorize="isAuthenticated()">
+    <img th:src="${profile.get('picture')}" th:attr="alt=${profile.get('name')}"/>
+    <h2 th:text="${profile.get('name')}"></h2>
+    <p th:text="${profile.get('email')}"></p>
+</div>
+</body>
+</html>
