@@ -11,6 +11,7 @@ System Requirements
 
 To use this template, you will need the following to be already installed on your machine:
 
+- Maven 3.x.x
 - JDK 20 or above
 - Git (Optional)
 - Lombok plugin (Optional - Can be installed based on IDE used, either Intellij or Eclipse or any other IDE)
@@ -18,7 +19,7 @@ To use this template, you will need the following to be already installed on you
 Quick Start
 -----------
 
-1. Replace the Auth0 & OpenWeatherMap credentials placeholder in application.yml file.
+1. Replace the Auth0 & OpenWeatherMap credentials placeholder in application.yml file at path src/main/java/resouces.
 
 2. Run the following `maven` command from the command line in the root directory of your project:
 
